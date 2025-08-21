@@ -1,3 +1,6 @@
+// Add this at the very top
+process.env.NODE_NO_WARNINGS = '1';
+
 import { getAuthFromRequest, handleAuthError } from '../lib/auth';
 
 export default async function handler(req, res) {

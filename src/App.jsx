@@ -29,7 +29,7 @@ function App() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/contacts');
+      const response = await fetch('/api/gmail?action=contacts');
       if (response.status === 200) {
         setIsAuthenticated(true);
       } else if (response.status === 401) {
@@ -46,7 +46,7 @@ function App() {
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/contacts');
+      const response = await fetch('/api/gmail?action=contacts');
       
       if (response.status === 401) {
         setIsAuthenticated(false);
@@ -87,7 +87,7 @@ function App() {
   const viewLastMessage = async (contact) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/message/${contact.lastMessageId}`);
+      const response = await fetch(`/api/gmail?action=message&messageId=${contact.lastMessageId}`);
       
       if (response.status === 401) {
         setIsAuthenticated(false);

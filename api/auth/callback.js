@@ -2,10 +2,6 @@ import { google } from 'googleapis';
 import { serialize } from 'cookie';
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   const { code } = req.query;
 
   if (!code) {
@@ -13,10 +9,15 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Determine the correct redirect URI based on the environment
+    const isLocalhost = req.headers.host.includes('localhost');
+    const protocol = isLocalhost ? 'http' : 'https';
+    const redirectUri = `${protocol}://${req.headers.host}/api/auth/callback`;
+
     const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      `${process.env.VERCEL_URL}/api/auth/callback`
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        redirectUri
     );
 
     // Exchange code for tokens
@@ -26,8 +27,8 @@ export default async function handler(req, res) {
     // Set HTTP-only, Secure cookies
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
-      sameSite: 'strict',
+      secure: !isLocalhost, // Use secure cookies in production only
+      sameSite: 'lax', // Changed from 'strict' to 'lax' for better compatibility
       path: '/',
       maxAge: 60 * 60 * 24 * 7 // 1 week
     };
@@ -35,7 +36,7 @@ export default async function handler(req, res) {
     res.setHeader('Set-Cookie', [
       serialize('gmail_access_token', tokens.access_token, {
         ...cookieOptions,
-        maxAge: 60 * 60 // 1 hour (typical access token lifetime)
+        maxAge: 60 * 60 // 1 hour
       }),
       serialize('gmail_refresh_token', tokens.refresh_token, cookieOptions)
     ]);
