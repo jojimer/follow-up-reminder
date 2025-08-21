@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { serialize } from 'cookie';
+// import { serialize } from 'cookie';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
